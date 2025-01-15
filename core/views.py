@@ -14,7 +14,7 @@ class AgencyViewSet(ModelViewSet):
     serializer_class = AgencySerializer
 
     @action(detail=True, methods=['get'])
-    def missions(self, request, pk=None):
+    def missions(self, request):
         """
         Get all missions for an agency.
         """
@@ -26,7 +26,7 @@ class AgencyViewSet(ModelViewSet):
             return Response({"error": "Agency not found"}, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['get'])
-    def astronauts(self, request, pk=None):
+    def astronauts(self, request):
         """
         Get all astronauts associated with an agency.
         """

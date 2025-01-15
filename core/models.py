@@ -27,18 +27,6 @@ class Planet(models.Model):
     def __str__(self):
         return self.name
 
-class Mission(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField()
-    launch_date = models.DateField()
-    duration_days = models.IntegerField()
-    agency = models.ForeignKey(Agency, on_delete=models.CASCADE, related_name='missions')
-    spacecrafts = models.ManyToManyField('Spacecraft', related_name='missions')
-    planets = models.ManyToManyField(Planet, related_name='missions')
-
-    def __str__(self):
-        return self.name
-
 class Spacecraft(models.Model):
     name = models.CharField(max_length=100, unique=True)
     type = models.CharField(max_length=100)
@@ -47,5 +35,19 @@ class Spacecraft(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Mission(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    launch_date = models.DateField()
+    duration_days = models.IntegerField()
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE, related_name='missions')
+    spacecrafts = models.ManyToManyField(Spacecraft, related_name='missions')
+    planets = models.ManyToManyField(Planet, related_name='missions')
+
+    def __str__(self):
+        return self.name
+
 
 
