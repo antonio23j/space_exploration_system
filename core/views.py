@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -14,7 +15,7 @@ class AgencyViewSet(ModelViewSet):
     serializer_class = AgencySerializer
 
     @action(detail=True, methods=['get'])
-    def missions(self, request):
+    def missions(self, request, pk=None):
         """
         Get all missions for an agency.
         """
@@ -26,7 +27,7 @@ class AgencyViewSet(ModelViewSet):
             return Response({"error": "Agency not found"}, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['get'])
-    def astronauts(self, request):
+    def astronauts(self, request, pk=None):
         """
         Get all astronauts associated with an agency.
         """
@@ -76,18 +77,6 @@ class MissionViewSet(ModelViewSet):
     queryset = Mission.objects.all()
     serializer_class = MissionSerializer
 
-    @action(detail=True, methods=['get'])
-    def missions(self, request, pk=None):
-        """
-        Get all missions visiting this planet.
-        """
-        try:
-            planet = self.get_object()
-            missions = planet.missions.all()
-            return Response({"missions": [mission.name for mission in missions]}, status=status.HTTP_200_OK)
-        except Planet.DoesNotExist:
-            return Response({"error": "Planet not found."}, status=status.HTTP_404_NOT_FOUND)
-
     @action(detail=True, methods=['post'])
     def add_spacecraft(self, request, pk=None):
         """
@@ -97,33 +86,21 @@ class MissionViewSet(ModelViewSet):
         try:
             mission = self.get_object()
             spacecraft = Spacecraft.objects.get(id=spacecraft_id)
-            mission.spacecraft.add(spacecraft)
+            mission.spacecrafts.add(spacecraft)
             return Response({"message": f"Spacecraft {spacecraft.name} added to Mission {mission.name}."},
                             status=status.HTTP_200_OK)
         except Spacecraft.DoesNotExist:
             return Response({"error": "Spacecraft not found."}, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['get'])
-    def spacecrafts(self, request):
+    def spacecrafts(self, request, pk=None):
         """
         List all spacecrafts in a mission.
         """
         try:
             mission = self.get_object()
-            spacecrafts = mission.spacecraft.all()
+            spacecrafts = mission.spacecrafts.all()
             return Response({"spacecrafts": [spacecraft.name for spacecraft in spacecrafts]}, status=status.HTTP_200_OK)
-        except Mission.DoesNotExist:
-            return Response({"error": "Mission not found."}, status=status.HTTP_404_NOT_FOUND)
-
-    @action(detail=True, methods=['get'])
-    def astronauts(self, request, pk=None):
-        """
-        Get all astronauts involved in a mission.
-        """
-        try:
-            mission = self.get_object()
-            astronauts = mission.astronauts.all()
-            return Response({"astronauts": [astronaut.name for astronaut in astronauts]}, status=status.HTTP_200_OK)
         except Mission.DoesNotExist:
             return Response({"error": "Mission not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -142,36 +119,6 @@ class MissionViewSet(ModelViewSet):
         except Spacecraft.DoesNotExist:
             return Response({"error": "Spacecraft not found."}, status=status.HTTP_404_NOT_FOUND)
 
-
-    @action(detail=True, methods=['post'])
-    def add_astronaut(self, request, pk=None):
-        """
-        Add an astronaut to a mission.
-        """
-        astronaut_id = request.data.get("astronaut_id")
-        try:
-            mission = self.get_object()
-            astronaut = Astronaut.objects.get(id=astronaut_id)
-            mission.astronauts.add(astronaut)
-            return Response({"message": f"Astronaut {astronaut.name} added to Mission {mission.name}."},
-                            status=status.HTTP_200_OK)
-        except Astronaut.DoesNotExist:
-            return Response({"error": "Astronaut not found."}, status=status.HTTP_404_NOT_FOUND)
-
-    @action(detail=True, methods=['delete'])
-    def remove_astronaut(self, request, pk=None):
-        """
-        Remove an astronaut from a mission.
-        """
-        astronaut_id = request.data.get("astronaut_id")
-        try:
-            mission = self.get_object()
-            astronaut = Astronaut.objects.get(id=astronaut_id)
-            mission.astronauts.remove(astronaut)
-            return Response({"message": f"Astronaut {astronaut.name} removed from Mission {mission.name}."},
-                            status=status.HTTP_200_OK)
-        except Astronaut.DoesNotExist:
-            return Response({"error": "Astronaut not found."}, status=status.HTTP_404_NOT_FOUND)
 
 class SpacecraftViewSet(ModelViewSet):
     queryset = Spacecraft.objects.all()

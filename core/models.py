@@ -14,6 +14,7 @@ class Astronaut(models.Model):
     name = models.CharField(max_length=100)
     nationality = models.CharField(max_length=100)
     birth_date = models.DateField()
+    agency = models.ForeignKey(Agency, on_delete=models.CASCADE, related_name='astronauts')
 
     def __str__(self):
         return self.name
@@ -32,6 +33,7 @@ class Spacecraft(models.Model):
     type = models.CharField(max_length=100)
     launch_date = models.DateField()
     agency = models.ForeignKey(Agency, on_delete=models.CASCADE, related_name='spacecrafts')
+    visited_planets = models.ManyToManyField(Planet, related_name='spacecrafts')
 
     def __str__(self):
         return self.name
