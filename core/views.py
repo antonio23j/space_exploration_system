@@ -80,15 +80,27 @@ class MissionViewSet(ModelViewSet):
     @action(detail=True, methods=['post'])
     def add_spacecraft(self, request, pk=None):
         """
-        Add a spacecraft to a mission.
+        Add a spacecraft to a mission and update its visited planets.
         """
         spacecraft_id = request.data.get("spacecraft_id")
         try:
             mission = self.get_object()
             spacecraft = Spacecraft.objects.get(id=spacecraft_id)
+
+            # Add the spacecraft to the mission
             mission.spacecrafts.add(spacecraft)
-            return Response({"message": f"Spacecraft {spacecraft.name} added to Mission {mission.name}."},
-                            status=status.HTTP_200_OK)
+
+            # Get planets related to this mission
+            planets = mission.planets.all()
+
+            # Add these planets to the spacecraft's visited_planets
+            spacecraft.visited_planets.add(*planets)
+
+            return Response({
+                "message": f"Spacecraft {spacecraft.name} added to Mission {mission.name}.",
+                "updated_visited_planets": [planet.name for planet in planets]
+            }, status=status.HTTP_200_OK)
+
         except Spacecraft.DoesNotExist:
             return Response({"error": "Spacecraft not found."}, status=status.HTTP_404_NOT_FOUND)
 
