@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -86,14 +85,8 @@ class MissionViewSet(ModelViewSet):
         try:
             mission = self.get_object()
             spacecraft = Spacecraft.objects.get(id=spacecraft_id)
-
-            # Add the spacecraft to the mission
             mission.spacecrafts.add(spacecraft)
-
-            # Get planets related to this mission
             planets = mission.planets.all()
-
-            # Add these planets to the spacecraft's visited_planets
             spacecraft.visited_planets.add(*planets)
 
             return Response({
